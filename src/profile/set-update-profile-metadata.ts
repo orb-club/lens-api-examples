@@ -96,8 +96,8 @@ export const setProfileMetadata = async () => {
   console.log('create profile: signature', signature);
 
   const { v, r, s } = splitSignature(signature);
-
-  const tx = await lensPeriphery.setProfileMetadataURIWithSig({
+  // from here to api
+  /*   const tx = await lensPeriphery.setProfileMetadataURIWithSig({
     profileId: createProfileMetadataRequest.profileId,
     metadata: createProfileMetadataRequest.metadata,
     sig: {
@@ -117,7 +117,11 @@ export const setProfileMetadata = async () => {
   const logs = indexedResult.txReceipt.logs;
 
   console.log('create profile metadata: logs', logs);
-
+ */
+  // {"profileId":"profileId","metadata":30,"v":"NewYork","r":"NewJersey","s":"NewYear","deadline":"deadline"}
+  console.log(`
+  {"profileId":"${createProfileMetadataRequest.profileId}","metadata":"${createProfileMetadataRequest.metadata}","v":"${v}","r":"${r}","s":"${s}","deadline":${typedData.value.deadline}}
+  `);
   return result.data;
 };
 
