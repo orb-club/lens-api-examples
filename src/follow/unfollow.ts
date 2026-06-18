@@ -1,10 +1,11 @@
 import { gql } from '@apollo/client/core';
-import { ethers } from 'ethers';
+import type { Abi } from 'viem';
 import { apolloClient } from '../apollo-client';
 import { login } from '../authentication/login';
 import { LENS_FOLLOW_NFT_ABI } from '../config';
-import { getAddressFromSigner, getSigner, signedTypeData, splitSignature } from '../ethers.service';
+import { getAddressFromSigner, signedTypeData, splitSignature } from '../ethers.service';
 import { prettyJSON } from '../helpers';
+import { createContract } from '../lens-hub';
 
 const CREATE_UNFOLLOW_TYPED_DATA = `
   mutation($request: UnfollowRequest!) { 
@@ -65,10 +66,9 @@ export const unfollow = async () => {
   const { v, r, s } = splitSignature(signature);
 
   // load up the follower nft contract
-  const followNftContract = new ethers.Contract(
+  const followNftContract = createContract(
     typedData.domain.verifyingContract,
-    LENS_FOLLOW_NFT_ABI,
-    getSigner()
+    LENS_FOLLOW_NFT_ABI as Abi
   );
 
   const sig = {

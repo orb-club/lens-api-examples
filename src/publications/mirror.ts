@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client/core';
-import { BigNumber, utils } from 'ethers';
+import { decodeAbiParameters, keccak256, toHex } from 'viem';
 import { apolloClient } from '../apollo-client';
 import { login } from '../authentication/login';
 import { PROFILE_ID } from '../config';
@@ -107,8 +107,8 @@ export const createMirror = async () => {
 
   console.log('create mirror: logs', logs);
 
-  const topicId = utils.id(
-    'MirrorCreated(uint256,uint256,uint256,uint256,bytes,address,bytes,uint256)'
+  const topicId = keccak256(
+    toHex('MirrorCreated(uint256,uint256,uint256,uint256,bytes,address,bytes,uint256)')
   );
   console.log('topicid we care about', topicId);
 
@@ -118,15 +118,15 @@ export const createMirror = async () => {
   let profileCreatedEventLog = profileCreatedLog.topics;
   console.log('create mirror: created event logs', profileCreatedEventLog);
 
-  const publicationId = utils.defaultAbiCoder.decode(['uint256'], profileCreatedEventLog[2])[0];
+  const publicationId = decodeAbiParameters(
+    [{ type: 'uint256' }],
+    profileCreatedEventLog[2]
+  )[0];
 
-  console.log(
-    'create mirror: contract publication id',
-    BigNumber.from(publicationId).toHexString()
-  );
+  console.log('create mirror: contract publication id', toHex(publicationId));
   console.log(
     'create mirror: internal publication id',
-    profileId + '-' + BigNumber.from(publicationId).toHexString()
+    profileId + '-' + toHex(publicationId)
   );
 
   return result.data;
