@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client/core';
-import { BigNumber, utils } from 'ethers';
+import { decodeAbiParameters, keccak256, toHex } from 'viem';
 import { v4 as uuidv4 } from 'uuid';
 import { apolloClient } from '../apollo-client';
 import { login } from '../authentication/login';
@@ -150,8 +150,10 @@ export const createComment = async () => {
 
   console.log('create comment: logs', logs);
 
-  const topicId = utils.id(
-    'CommentCreated(uint256,uint256,string,uint256,uint256,bytes,address,bytes,address,bytes,uint256)'
+  const topicId = keccak256(
+    toHex(
+      'CommentCreated(uint256,uint256,string,uint256,uint256,bytes,address,bytes,address,bytes,uint256)'
+    )
   );
   console.log('topicid we care about', topicId);
 
@@ -161,15 +163,15 @@ export const createComment = async () => {
   let profileCreatedEventLog = profileCreatedLog.topics;
   console.log('create comment: created event logs', profileCreatedEventLog);
 
-  const publicationId = utils.defaultAbiCoder.decode(['uint256'], profileCreatedEventLog[2])[0];
+  const publicationId = decodeAbiParameters(
+    [{ type: 'uint256' }],
+    profileCreatedEventLog[2]
+  )[0];
 
-  console.log(
-    'create comment: contract publication id',
-    BigNumber.from(publicationId).toHexString()
-  );
+  console.log('create comment: contract publication id', toHex(publicationId));
   console.log(
     'create comment: internal publication id',
-    profileId + '-' + BigNumber.from(publicationId).toHexString()
+    profileId + '-' + toHex(publicationId)
   );
 
   return result.data;

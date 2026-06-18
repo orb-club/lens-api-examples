@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client/core';
-import { BigNumber, utils } from 'ethers';
+import { decodeAbiParameters, keccak256, toHex } from 'viem';
 import { apolloClient } from '../apollo-client';
 import { login } from '../authentication/login';
 import { getAddressFromSigner } from '../ethers.service';
@@ -54,8 +54,8 @@ export const createProfile = async () => {
 
   console.log('create profile: logs', logs);
 
-  const topicId = utils.id(
-    'ProfileCreated(uint256,address,address,string,string,address,bytes,string,uint256)'
+  const topicId = keccak256(
+    toHex('ProfileCreated(uint256,address,address,string,string,address,bytes,string,uint256)')
   );
   console.log('topicid we care about', topicId);
 
@@ -65,9 +65,12 @@ export const createProfile = async () => {
   let profileCreatedEventLog = profileCreatedLog.topics;
   console.log('profile created event logs', profileCreatedEventLog);
 
-  const profileId = utils.defaultAbiCoder.decode(['uint256'], profileCreatedEventLog[1])[0];
+  const profileId = decodeAbiParameters(
+    [{ type: 'uint256' }],
+    profileCreatedEventLog[1]
+  )[0];
 
-  console.log('profile id', BigNumber.from(profileId).toHexString());
+  console.log('profile id', toHex(profileId));
 
   return result.data;
 };
