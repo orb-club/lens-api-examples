@@ -1,40 +1,74 @@
-# Lens API
+# Lens API examples
 
-This repo has running code which you can execute to help you understand how to interact with the Lens API.
+This repository is Orb's fork of [lens-protocol/api-examples](https://github.com/lens-protocol/api-examples).
 
-Lens API is beta at the moment and can change without warning!
+The scripts show how to call the Lens API.
+They send GraphQL requests through Apollo Client.
+Accounts, signatures, and contract calls use viem 2.x.
+The `dependencies` entry `viem` is `^2.52.2`.
+The dependency list has no `ethers` package.
 
-Full documentation is available at [https://docs.lens.dev/docs/introduction](https://docs.lens.dev/docs/introduction).
+## Network
+
+The scripts still target Polygon Mumbai.
+Mumbai is a retired testnet.
+`src/ethers.service.ts` sets the viem chain to `polygonMumbai`.
 
 ## Setup
 
-for the scripts to run you need to create a `.env` (or copy the template `cp .env.template .env`) file with these variables:
-
-```
-PK=YOUR_PK
-MUMBAI_RPC_URL=https://rpc-mumbai.matic.today
-PROFILE_ID=PROFILE_ID
-LENS_API=https://api-mumbai.lens.dev/
-LENS_HUB_CONTRACT=0x60Ae865ee4C725cd04353b5AAb364553f56ceF82
-LENS_PERIPHERY_CONTRACT=0xD5037d72877808cdE7F669563e9389930AF404E8
-
-INFURA_PROJECT_ID=YOUR_INFURA_PROJECT_ID
-INFURA_SECRET=YOUR_INFURA_SECRET
-```
-
-note `PROFILE_ID` is optional but required on some endpoints!
-note 2: Highly advised to create an API key and use the Alchemy RPC provider for Mumbai to avoid rate limiting.
-
-## How to run
-
-look in the `package.json` file for the `scripts` section you see all the scripts you can run. This is prefixed with `resolver:method`.
-
-example running:
+Copy `.env.template` to `.env`.
 
 ```bash
-$ npm run authentication:login
+cp .env.template .env
 ```
 
-## Issues
+Install packages with npm.
 
-If you have any issues with the API or want a new endpoint please create an issue!
+```bash
+npm install
+```
+
+`src/config.ts` reads the variables below.
+Each script loads `src/config.ts` before it runs.
+The process exits when a required variable is missing.
+
+`PK` is the private key for the viem account.
+`MUMBAI_RPC_URL` is the HTTP RPC URL.
+`LENS_API` is the Lens GraphQL URL.
+`LENS_HUB_CONTRACT` is the Lens hub address.
+`LENS_PERIPHERY_CONTRACT` is the Lens periphery address.
+
+`PROFILE_ID` is optional in `src/config.ts`.
+Many scripts throw when `PROFILE_ID` is empty.
+`INFURA_PROJECT_ID` and `INFURA_SECRET` are optional in `src/config.ts`.
+`publications:post`, `publications:comment`, and `profile:set-profile-metadata` upload JSON through `src/ipfs.ts`.
+The upload host is `ipfs.infura.io`.
+Those three scripts fail when either Infura variable is empty.
+
+`.env.template` still stores Mumbai values.
+`MUMBAI_RPC_URL` is `https://rpc-mumbai.matic.today`.
+`LENS_API` is `https://api-mumbai.lens.dev/`.
+`LENS_HUB_CONTRACT` is `0x60Ae865ee4C725cd04353b5AAb364553f56ceF82`.
+`LENS_PERIPHERY_CONTRACT` is `0xD5037d72877808cdE7F669563e9389930AF404E8`.
+These template values point at the retired Mumbai testnet.
+Editing `.env` does not change the viem chain.
+The chain stays `polygonMumbai` in `src/ethers.service.ts`.
+
+## Run
+
+Script names live in the `scripts` section of `package.json`.
+Each name has the form `area:method`.
+Each script loads `.env` with `env-cmd`.
+Each script runs `ts-node` on a file under `src/`.
+
+Run login with this command.
+
+```bash
+npm run authentication:login
+```
+
+`authentication:login` requests a challenge and signs it.
+`authentication:verify` checks the access token.
+`authentication:refresh` requests a new access token.
+`profile:get-profile` loads one profile.
+That script requires `PROFILE_ID`.
